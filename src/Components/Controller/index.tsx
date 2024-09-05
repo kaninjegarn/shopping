@@ -1,9 +1,10 @@
 import styled from 'styled-components';
 import ShoppingList from '../ShoppingList';
 import { mainDark, margin, primaryText } from '../../helpers/Variables';
-import { useState } from 'react';
-import { Award, Archive, Anchor, Airplay } from 'react-feather';
+import { useContext, useState } from 'react';
+import { Award, Archive, Anchor, Airplay, ArrowLeft } from 'react-feather';
 import Category from './Category';
+import { TodoContext, TodoProvider } from '../TodoContext';
 
 export default () => {
   const [categories, setCategories] = useState([
@@ -12,13 +13,24 @@ export default () => {
     { id: 2, name: "Bakery", qty: 2, iconId: 3},
     { id: 3, name: "Bakery", qty: 2, iconId: 4},
   ])
+  const context = useContext(TodoContext);
+
+  if (!context) {
+    throw new Error('ThemeToggler must be used within a ThemeProvider');
+  }
+
+  const {showCategories, toggleView} = context
+
+  // console.log(showCategories);
+
   return(
     <Container>
       <Heading>
+      {!showCategories && <ArrowLeft onClick={() => toggleView(-1)}/>}
       <Title>Todo List</Title>
       </Heading>
       {categories.map(category => <Category key={category.id} {...category}/>)}
-      <ShoppingList/>
+      {/* <ShoppingList/> */}
     </Container>
   )
 }

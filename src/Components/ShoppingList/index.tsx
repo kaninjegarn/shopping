@@ -10,7 +10,11 @@ interface Todo {
   completed: boolean;
 }
 
-export default () => {
+type Proptype = {
+  goBack: () => void;
+}
+
+export default (props: Proptype) => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState<string>('');
   const [activateInput, toggleActivateInput] = useState<boolean>(false);
@@ -60,7 +64,7 @@ export default () => {
   return (
     <Container>
       <Heading>
-      <ArrowLeft />
+      <ArrowLeft onClick={() => props.goBack}/>
       <Title>Todo List</Title>
       <Progress>
         {countCompletedTodos(todos)} / {todos.length}

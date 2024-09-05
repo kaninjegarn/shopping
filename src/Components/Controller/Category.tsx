@@ -1,6 +1,9 @@
 import styled from "styled-components";
 import { Award, Archive, Anchor, Airplay } from 'react-feather';
 import { FontSize, mainDark, margin, primaryText, secondaryDark } from "../../helpers/Variables";
+import { useContext, useState } from "react";
+import ShoppingList from "../ShoppingList";
+import { TodoContext } from "../TodoContext";
 
 
 type Proptype = {
@@ -10,40 +13,55 @@ type Proptype = {
   iconId: number;
 }
 
-function generateIcon(iconId: number) {
-  if (!iconId) { return;}
-  let icon;
-  switch (iconId) {
-    case 1:
-      icon = <Award />
-      break;
-    case 2:
-      icon = <Archive />
-      break;
-    case 3:
-      icon = <Anchor />
-      break;
-    case 4:
-      icon = <Airplay />
-      break;
-    default:
-      icon = <Airplay />
-      break;
-  }
-  return icon;
-}
-
-const handleClickCategory = (category: string) => {
-  console.log("clicked", category);
-}
 
 export default (props: Proptype) => {
+  const [showList, setShowList ] = useState<boolean>(false);
+  const context = useContext(TodoContext);
+  if (!context) {
+    throw new Error('ThemeToggler must be used within a ThemeProvider');
+  }
+  const {showCategories, toggleView, determinateCategory} = context
+
+  if (showCategories && determinateCategory == props.id) console.log("ja") 
+
+  function generateIcon(iconId: number) {
+    if (!iconId) { return;}
+    let icon;
+    switch (iconId) {
+      case 1:
+        icon = <Award />
+        break;
+      case 2:
+        icon = <Archive />
+        break;
+      case 3:
+        icon = <Anchor />
+        break;
+      case 4:
+        icon = <Airplay />
+        break;
+      default:
+        icon = <Airplay />
+        break;
+    }
+    return icon;
+  }
+  
+  const handleClickCategory = (id: number) => {
+    console.log("clicked", id);
+    // setShowList(true);
+    toggleView(id);
+  }
+  
   return(
-    <Wrapper onClick={() => handleClickCategory(props.name)}>
+    <>
+    {!showList && <Wrapper onClick={() => handleClickCategory(props.id)}>
       <Icon>{generateIcon(props.iconId)}</Icon>
       <Name>{props.name}</Name>
       <Quantity>{props.qty}</Quantity>
-    </Wrapper>
+    </Wrapper>}
+    { showCategories && <ShoppingList goBack={() => setShowList(false)} />}
+    </>
   )
 }
 
