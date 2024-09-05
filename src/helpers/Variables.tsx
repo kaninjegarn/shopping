@@ -1,4 +1,3 @@
-
 // Background
 export const mainDark = "#2E2E36";
 export const secondaryDark = "#393940";
