@@ -1,10 +1,13 @@
 import Controller from "./Components/Controller";
+import { TodoProvider } from "./Components/TodoContext";
 import './index.css';
 
 function App() {
   return (
     <div className="App">
-      <Controller />
+      <TodoProvider>
+        <Controller />
+      </TodoProvider>
     </div>
   );
 }
