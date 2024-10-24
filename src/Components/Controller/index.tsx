@@ -1,7 +1,7 @@
 import styled from 'styled-components';
-import { FontSize, mainDark, malachite, margin, primaryText, secondaryDark } from '../../helpers/Variables';
+import { FontSize, margin, primaryBlue, primaryDark, primaryGrey, primaryText, primaryWhite } from '../../helpers/Variables';
 import { useEffect, useState } from 'react';
-import { Award, Archive, Anchor, Airplay, ArrowLeft, Plus, Circle, Check, ArrowRight } from 'react-feather';
+import { Calendar, Award, Archive, Anchor, Airplay, ArrowLeft, Plus, Circle, Check, Flag, Folder, Moon, Crosshair, X, Disc } from 'react-feather';
 
 interface Todo {
   text: string;
@@ -152,28 +152,30 @@ export default () => {
           {!categoryIsNull && `${foundCategory?.quantity} / ${numberOfCompletedTodos}`}
         </Progress>
       </Heading>
-      <div>
+      categories
+      <Categories>
       {categoryIsNull
         ?
         categories.map(category => (
-          <div key={category.id}>
+          <CategoryCard key={category.id}>
             <Wrapper
               // onClick={() => setSelectedCategoryId(category.id)}
               style={{ opacity: allTodosIsCompleted(category.id) ? 0.5 : 1 }}
             >
-              {allTodosIsCompleted(category.id) ? <button onClick={() => handleRemove(category.id)}>X</button> : <Icon>{generateIcon(category.icon)}</Icon>}
+              {/*!TODO */}
+              {/* {allTodosIsCompleted(category.id) ? <button onClick={() => handleRemove(category.id)}>X</button> : <Icon>{generateIcon(category.icon)}</Icon>} */}
+              <Quantity>
+                {category.quantity} tasks
+              </Quantity>
               <Title 
                 onClick={() => setSelectedCategoryId(category.id)}
                 style={{ textDecoration: allTodosIsCompleted(category.id) ? 'line-through' : 'none' }}
                 >
               {category.categoryName}
-              <Quantity>
-                {category.quantity}
-              </Quantity>
             </Title>
-            <ArrowRightIcon>
+            {/* <ArrowRightIcon>
               <ArrowRight />
-            </ArrowRightIcon>
+            </ArrowRightIcon> */}
             </Wrapper>
             {selectedCategoryId === category.id && (
               <>
@@ -184,7 +186,7 @@ export default () => {
                         {todo.text}
                       </Name>
                       <CTA onClick={() => toggleTodoCompletion(category.id, index)}>
-                        {!todo.completed ? <Circle /> : <Check color={malachite}/>}
+                        {!todo.completed ? <Circle /> : <Check />}
                       </CTA>
                     </Item>
                   ))}
@@ -194,7 +196,7 @@ export default () => {
                     <Plus strokeWidth={2} color='white' size={36}/>
                   </span>
                 </CirleButton>
-                {activateInput &&<div>
+                {activateInput && <div>
                   <input
                     type="text"
                     value={newTodoText}
@@ -211,7 +213,7 @@ export default () => {
                 </div>}
               </>
             )}
-          </div>
+          </CategoryCard>
         )) : 
         categories
           .filter(category => category.id === selectedCategoryId)
@@ -227,7 +229,7 @@ export default () => {
                     </Name>
                     {/* Icon representation */}
                     <CTA onClick={() => toggleTodoCompletion(category.id, index)}>
-                    {!todo.completed ? <Circle /> : <Check color={malachite}/>}
+                    {!todo.completed ? <Circle /> : <Check />}
                   </CTA>
                     {/* <input
                       type="checkbox"
@@ -265,21 +267,32 @@ export default () => {
             </Listing>
           ))
       }
-      {categoryIsNull && <Wrapper onClick={addNewCategory}>
-        Add new Category
+      </Categories>
+      {categoryIsNull && <AddNewCategory onClick={addNewCategory}>
+        <PlusIcon>+</PlusIcon>
         {activeCategoryInput && 
-        <AddNew isVisible={isVisible}>
-          <Input
-            type="text"
-            value={newCategoryText}
-            placeholder={`Add new category`}
-            onChange={(e) => setNewCategoryText(e.target.value)}
+        // <AddNew isVisible={isVisible}>
+        <AddNew>
+          <Close><X /></Close>
+            <Input
+              type="text"
+              value={newCategoryText}
+              placeholder={`Add new category`}
+              onChange={(e) => setNewCategoryText(e.target.value)}
             />
+            <DateWrapper>
+              <CalendarBtn><Calendar size={16}/>Today</CalendarBtn>
+              <RoundButton><Disc color={primaryBlue}/></RoundButton>
+            </DateWrapper>
+            <TriButtonWrapper>
+              <Folder />
+              <Flag style={{margin: '0 16px'}}/>
+              <Moon />
+            </TriButtonWrapper>
           <Button onClick={addNewCategory}>Add Todo</Button>
         </AddNew>
       }
-      </Wrapper>}
-      </div>
+      </AddNewCategory>}
         {/* Render only the selected category if one is clicked, otherwise render all categories */}
     </Container>
   );
@@ -308,45 +321,145 @@ interface AddNewProps {
   isVisible: boolean;
 }
 
-const AddNew = styled.div<AddNewProps>`
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 40vh;
-  background-color: ${secondaryDark};
-  transform: scaleY(0);
-  transform-origin: bottom; 
-  transition: transform 1s ease-in-out;
-  z-index: 9999;
-  ${({ isVisible }) =>
-    isVisible &&
-    `
-    transform: scaleY(1);
-  `}
-`;
+// const AddNew = styled.div<AddNewProps>`
+//   position: fixed;
+//   bottom: 0;
+//   left: 0;
+//   width: 100%;
+//   height: 40vh;
+//   background-color: ${primaryText};
+//   transform: scaleY(0);
+//   transform-origin: bottom; 
+//   transition: transform 1s ease-in-out;
+//   z-index: 9999;
+//   ${({ isVisible }) =>
+//     isVisible &&
+//     `
+//     transform: scaleY(1);
+//   `}
+// `;
+
+const AddNew = styled.div({
+  position: 'fixed',
+  bottom: 0,
+  left: 0,
+  margin: '0 auto',
+  width: '90%',
+  height: '100vh',
+  backgroundColor: 'white',
+  display: 'flex',
+  flexDirection: 'column',
+  justifyContent: 'center',
+  alignItems: 'center',
+
+});
 
 const Input = styled.input({
   display: 'flex',
   padding: margin.Medium,
-  borderRadius: '25px',
   cursor: 'pointer',
-  margin: '0 auto',
+  margin:  `${margin.Large} auto`,
+  border: 'none',
+});
+
+const DateWrapper = styled.div({
+  display: 'flex',
+  justifyContent: 'start',
+});
+
+const CalendarBtn = styled.div({
+  padding: '8px',
+  border: `1px solid ${primaryGrey}`,
+  width: '80px',
+  height: '20px',
+  borderRadius: '20px',
+  marginRight: margin.Small,
+});
+
+const RoundButton = styled.div({
+  height: '40px',
+  width: '40px',
+  border: `1px solid ${primaryGrey}`,
+  borderRadius: '20px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+});
+
+const TriButtonWrapper = styled.div({
+  margin: `${margin.XLarge} auto`,
+});
+
+
+const Categories = styled.div({
+  display: 'flex',
+});
+
+const CategoryCard = styled.div({
+  width: '220px',
+  height: '100px',
+  backgroundColor: 'purple',
+  borderRadius: '12px',
+  marginRight: margin.Small,
+});
+
+const Close = styled.div({
+  position: 'absolute',
+  top: '25px',
+  right: '25px',
+  height: '40px',
+  width: '40px',
+  border: `1px solid ${primaryGrey}`,
+  borderRadius: '20px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+});
+
+const CloseIcon = styled.div({
+  fontSize: '22px',
+  fontWeight: '600',
+  marginBottom: margin.Small,
+});
+
+
+
+const AddNewCategory = styled.div({
+  position: 'absolute',
+  right: '15px',
+  bottom: '15px',
+  width: '50px',
+  height: '50px',
+  borderRadius: '25px',
+  backgroundColor: primaryBlue,
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+});
+
+const PlusIcon = styled.div({
+  color: 'white',
+  fontSize: '28px',
+  marginBottom: margin.Small,
 });
 
 const Button = styled.div({
+  position: 'absolute',
+  bottom: '25px',
+  right: '25px',
   margin: '0 auto',
-  width: '150px',
+  width: '120px',
+  height: '40px',
+  color: 'white',
+  backgroundColor: primaryBlue,
   textAlign: 'center',
   borderRadius: '25px',
-  borderColor: 'blue',
-  borderStyle: 'solid',
 });
 
 const Container = styled.div({
   margin: 0,
   height: '100vh',
-  backgroundColor: mainDark,
+  backgroundColor: primaryWhite,
   color: primaryText,
   padding: '0 16px',
 })
@@ -364,12 +477,10 @@ const Heading = styled.div({
 });
 
 const Quantity = styled.span({
-  marginLeft: margin.Small,
-  flexBasis: '4%',
   borderRadius: '10px',
   padding: '6px 10px',
   backgroundColor: primaryText,
-  color: mainDark,
+  color: primaryDark,
   fontSize: FontSize.large,
   fontWeight: 'bold',
   textAlign: 'center',
@@ -377,15 +488,15 @@ const Quantity = styled.span({
 
 const Title = styled.h2({
   margin: '0',
-  flexBasis: '90%'
-})
+  fontSize: '28px',
+});
 
 const TakeMeBack =  styled.div({cursor: 'pointer'})
 
 const CirleButton = styled.div({
   position: 'absolute',
   cursor: 'pointer',
-  backgroundColor: malachite,
+  backgroundColor: primaryDark,
   borderRadius: '50%',
   height: 56,
   width: 56,
@@ -399,14 +510,12 @@ const CirleButton = styled.div({
 const Listing = styled.div({
   minHeight: '350px',
   borderRadius: '25px',
-  backgroundColor: secondaryDark,
   padding: margin.MediumLarge,
 });
 
 const Wrapper = styled.div({
-  display: 'flex',
   margin: `${margin.Small} 0`,
-  backgroundColor: secondaryDark,
+  
   padding: margin.Medium,
   borderRadius: '25px',
   cursor: 'pointer',
