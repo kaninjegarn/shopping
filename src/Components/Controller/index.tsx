@@ -2,6 +2,9 @@ import styled from 'styled-components';
 import { FontSize, margin, primaryBlue, primaryDark, primaryGrey, primaryText, primaryWhite } from '../../helpers/Variables';
 import { useEffect, useState } from 'react';
 import { Calendar, Award, Archive, Anchor, Airplay, ArrowLeft, Plus, Circle, Check, Flag, Folder, Moon, Crosshair, X, Disc } from 'react-feather';
+import InputModal from '../InputModal';
+import ProgressBar from '../ProgressBar';
+import Carousel from '../Carousel';
 
 interface Todo {
   text: string;
@@ -24,6 +27,13 @@ export default () => {
   const [categories, setCategories] = useState<TodoCategory[]>([
     { id: 1, categoryName: 'Work', todos: [], quantity: 0,  icon: 1},
     { id: 2, categoryName: 'Home', todos: [], quantity: 0, icon: 2 },
+    { id: 3, categoryName: 'list', todos: [], quantity: 0, icon: 2 },
+    { id: 4, categoryName: 'shopping', todos: [], quantity: 0, icon: 2 },
+    { id: 5, categoryName: 'funny', todos: [], quantity: 0, icon: 2 },
+    { id: 6, categoryName: 's', todos: [], quantity: 0, icon: 2 },
+    { id: 7, categoryName: 'a', todos: [], quantity: 0, icon: 2 },
+    { id: 8, categoryName: 'q', todos: [], quantity: 0, icon: 2 },
+    { id: 9, categoryName: 'd', todos: [], quantity: 0, icon: 2 },
   ]);
   const [activeCategoryInput, toggleActiveCategoryInput] = useState<Boolean>(false);
   const [newCategory, setNewCategory] = useState<NewCategoryTemplate[]>([]);
@@ -31,6 +41,16 @@ export default () => {
   const [newCategoryText, setNewCategoryText] = useState<string>('');
   const [newTodoText, setNewTodoText] = useState<string>('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+
+  // Used for <Modal />
+  const [inputModal, toggleInputModal] = useState<boolean>(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Used for <ProgressBar />
+  const [progress, setProgress] = useState(50);
+
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const handleAddTodo = () => {
     if (!newTodoText || selectedCategoryId === null) return;
@@ -53,6 +73,7 @@ export default () => {
     );
     toggleActivateInput(false);
     setNewTodoText(''); // Clear text input after adding
+    closeModal();
   };
 
   const toggleTodoCompletion = (categoryId: number, todoIndex: number) => {
@@ -73,15 +94,17 @@ export default () => {
   const addNewCategory = () => {
     toggleActiveCategoryInput(true);
     setNewCategoryText("");
-
+    
     if(newCategoryText !== "") {
       const tempCategories = [...categories];
       tempCategories.push({ id: categories.length + 1, categoryName: newCategoryText, todos: [], quantity: 0, icon: 2 });
       setCategories(tempCategories);
+      toggleInputModal(false);
       toggleActiveCategoryInput(false);
+      closeModal();
     }
   };
-
+  
   function generateIcon(iconId: number) {
     if (!iconId) { return;}
     let icon;
@@ -149,33 +172,95 @@ export default () => {
           foundCategory?.categoryName }
         </MainTitle>
         <Progress>
+        Slide 4
           {!categoryIsNull && `${foundCategory?.quantity} / ${numberOfCompletedTodos}`}
         </Progress>
       </Heading>
-      categories
+      <CategoryTitle>
+        Categories
+      </CategoryTitle>
+      {/* TOP CONTENT CAROUSEL */}
+      <Carousel>
+        {categories.map(category => (
+           <CategoryCard key={category.id}>
+           <Wrapper>
+             {/*!TODO */}
+             {/* {allTodosIsCompleted(category.id) ? <button onClick={() => handleRemove(category.id)}>X</button> : <Icon>{generateIcon(category.icon)}</Icon>} */}
+             <Quantity >
+               {category.quantity} tasks
+             </Quantity>
+             <Title 
+               onClick={() => setSelectedCategoryId(category.id)}
+               style={
+                 {
+                   textDecoration: allTodosIsCompleted(category.id) ? 'line-through' : 'none',
+                   opacity: allTodosIsCompleted(category.id) ? 0.5 : 1
+                 }
+               }
+               >
+             {category.categoryName}
+           </Title>
+           <ProgressBar progress={parseInt((category.todos.filter(todo => todo.completed === true).length /
+           category.quantity * 100).toFixed(0))} color="blue" height={25}/>
+           </Wrapper>
+           {/* {selectedCategoryId === category.id && (
+             <>
+               <Listing>
+                 {category.todos.map((todo, index) => (
+                   <Item key={index}>
+                     <Name style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
+                       {todo.text}
+                     </Name>
+                     <CTA onClick={() => toggleTodoCompletion(category.id, index)}>
+                       {!todo.completed ? <Circle /> : <Check />}
+                     </CTA>
+                   </Item>
+                 ))}
+               </Listing>
+               <CirleButton onClick={() => toggleActivateInput(!activateInput)}>
+                 <span>
+                   <Plus strokeWidth={2} color='white' size={36}/>
+                 </span>
+               </CirleButton>
+               {activateInput &&
+               <div>
+                 <input
+                   type="text"
+                   value={newTodoText}
+                   placeholder={`Add todo to ${category.categoryName}`}
+                   onChange={(e) => setNewTodoText(e.target.value)}
+                 />
+                 <button onClick={handleAddTodo}>Add Todo</button>
+               </div>}
+             </>
+           )} */}
+         </CategoryCard>
+        ))}
+      </Carousel>
       <Categories>
       {categoryIsNull
         ?
         categories.map(category => (
           <CategoryCard key={category.id}>
-            <Wrapper
-              // onClick={() => setSelectedCategoryId(category.id)}
-              style={{ opacity: allTodosIsCompleted(category.id) ? 0.5 : 1 }}
-            >
+            <Wrapper>
               {/*!TODO */}
               {/* {allTodosIsCompleted(category.id) ? <button onClick={() => handleRemove(category.id)}>X</button> : <Icon>{generateIcon(category.icon)}</Icon>} */}
-              <Quantity>
+              <Quantity >
                 {category.quantity} tasks
               </Quantity>
               <Title 
                 onClick={() => setSelectedCategoryId(category.id)}
-                style={{ textDecoration: allTodosIsCompleted(category.id) ? 'line-through' : 'none' }}
+                style={
+                  {
+                    textDecoration: allTodosIsCompleted(category.id) ? 'line-through' : 'none',
+                    opacity: allTodosIsCompleted(category.id) ? 0.5 : 1
+                  }
+                }
                 >
               {category.categoryName}
             </Title>
-            {/* <ArrowRightIcon>
-              <ArrowRight />
-            </ArrowRightIcon> */}
+            <ProgressBar progress={parseInt((category.todos.filter(todo => todo.completed === true).length /
+            category.quantity * 100).toFixed(0))} color="blue" height={25}/>
             </Wrapper>
             {selectedCategoryId === category.id && (
               <>
@@ -196,25 +281,20 @@ export default () => {
                     <Plus strokeWidth={2} color='white' size={36}/>
                   </span>
                 </CirleButton>
-                {activateInput && <div>
+                {activateInput &&
+                <div>
                   <input
                     type="text"
                     value={newTodoText}
                     placeholder={`Add todo to ${category.categoryName}`}
                     onChange={(e) => setNewTodoText(e.target.value)}
                   />
-                  {/* <input
-                    type="number"
-                    value={newTodoIcon}
-                    placeholder="Icon number"
-                    onChange={(e) => setNewTodoIcon(Number(e.target.value))}
-                  /> */}
                   <button onClick={handleAddTodo}>Add Todo</button>
                 </div>}
               </>
             )}
           </CategoryCard>
-        )) : 
+        )):
         categories
           .filter(category => category.id === selectedCategoryId)
           .map(category => (
@@ -231,127 +311,63 @@ export default () => {
                     <CTA onClick={() => toggleTodoCompletion(category.id, index)}>
                     {!todo.completed ? <Circle /> : <Check />}
                   </CTA>
-                    {/* <input
-                      type="checkbox"
-                      checked={todo.completed}
-                      onChange={() => toggleTodoCompletion(category.id, index)}
-                    /> */}
                   </Item>
                 ))}
-              </div>
-
-              <div>
-                {/* <input
-                  type="text"
-                  value={newTodoText}
-                  placeholder={`Add todo to ${category.categoryName}`}
-                  onChange={(e) => setNewTodoText(e.target.value)}
-                />
-                <button onClick={handleAddTodo}>Add Todo</button> */}
-                <CirleButton onClick={() => toggleActivateInput(!activateInput)}>
-                <span>
-                  <Plus strokeWidth={2} color='white' size={36}/>
-                </span>
-                </CirleButton>
-                  {activateInput && 
-                    <div>
-                      <input
-                        type="text"
-                        value={newTodoText}
-                        placeholder={`Add todo to ${category.categoryName}`}
-                        onChange={(e) => setNewTodoText(e.target.value)}
-                      />
-                    <button onClick={handleAddTodo}>Add Todo</button>
-                  </div>}
               </div>
             </Listing>
           ))
       }
       </Categories>
-      {categoryIsNull && <AddNewCategory onClick={addNewCategory}>
-        <PlusIcon>+</PlusIcon>
-        {activeCategoryInput && 
-        // <AddNew isVisible={isVisible}>
-        <AddNew>
-          <Close><X /></Close>
-            <Input
-              type="text"
-              value={newCategoryText}
-              placeholder={`Add new category`}
-              onChange={(e) => setNewCategoryText(e.target.value)}
-            />
-            <DateWrapper>
-              <CalendarBtn><Calendar size={16}/>Today</CalendarBtn>
-              <RoundButton><Disc color={primaryBlue}/></RoundButton>
-            </DateWrapper>
-            <TriButtonWrapper>
-              <Folder />
-              <Flag style={{margin: '0 16px'}}/>
-              <Moon />
-            </TriButtonWrapper>
-          <Button onClick={addNewCategory}>Add Todo</Button>
-        </AddNew>
-      }
-      </AddNewCategory>}
-        {/* Render only the selected category if one is clicked, otherwise render all categories */}
+
+      <OpenModal onClick={openModal}><Plus /></OpenModal>
+      <InputModal isOpen={isModalOpen} onClose={closeModal} title="Sample Modal">
+      {categoryIsNull ? (
+      <>
+        <Input
+          type="text"
+          value={newCategoryText}
+          placeholder={`Add new category`}
+          onChange={(e) => setNewCategoryText(e.target.value)}
+        />
+        <DateWrapper>
+          <CalendarBtn><Calendar size={16}/>Today</CalendarBtn>
+          <RoundButton><Disc color={primaryBlue}/></RoundButton>
+        </DateWrapper>
+        <TriButtonWrapper>
+          <Folder />
+          <Flag style={{margin: '0 16px'}}/>
+          <Moon />
+        </TriButtonWrapper>
+        <Button onClick={addNewCategory}>Add Todo</Button>
+      </>)
+      :(
+        <div>
+          <input
+            type="text"
+            value={newTodoText}
+            // placeholder={`Add todo to ${category.categoryName}`}
+            onChange={(e) => setNewTodoText(e.target.value)}
+          />
+          <button onClick={handleAddTodo}>Add Todo</button>
+        </div>
+      )
+    }
+      </InputModal>
     </Container>
   );
 };
 
-// <CirleButton onClick={() => toggleActivateInput(!activateInput)}>
-// <span>
-//   <Plus strokeWidth={2} color='white' size={36}/>
-// </span>
-// </CirleButton>
-// {activateInput && <div>
-// <input
-//   type="text"
-//   value={newTodo}
-//   placeholder={`Add todo to ${category.categoryName}`}
-//   onChange={(e) => setNewTodo(e.target.value)}
-// />
-// <button onClick={handleAddTodo}>Add Todo</button>
-// </div>}
-
-
-
-// const AddNew = styled.div({});
-
-interface AddNewProps {
-  isVisible: boolean;
-}
-
-// const AddNew = styled.div<AddNewProps>`
-//   position: fixed;
-//   bottom: 0;
-//   left: 0;
-//   width: 100%;
-//   height: 40vh;
-//   background-color: ${primaryText};
-//   transform: scaleY(0);
-//   transform-origin: bottom; 
-//   transition: transform 1s ease-in-out;
-//   z-index: 9999;
-//   ${({ isVisible }) =>
-//     isVisible &&
-//     `
-//     transform: scaleY(1);
-//   `}
-// `;
-
-const AddNew = styled.div({
-  position: 'fixed',
-  bottom: 0,
-  left: 0,
-  margin: '0 auto',
-  width: '90%',
-  height: '100vh',
-  backgroundColor: 'white',
+const OpenModal = styled.button({
+  position: 'absolute',
+  right: '15px',
+  bottom: '15px',
+  width: '50px',
+  height: '50px',
+  borderRadius: '25px',
+  backgroundColor: primaryBlue,
   display: 'flex',
-  flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
-
 });
 
 const Input = styled.input({
@@ -365,6 +381,12 @@ const Input = styled.input({
 const DateWrapper = styled.div({
   display: 'flex',
   justifyContent: 'start',
+});
+
+const CategoryTitle = styled.p({
+  opacity: 0.5,
+  fontWeight: 500,
+  textTransform: 'uppercase',
 });
 
 const CalendarBtn = styled.div({
@@ -390,57 +412,35 @@ const TriButtonWrapper = styled.div({
   margin: `${margin.XLarge} auto`,
 });
 
+// const Categories = styled.div({
+//   display: 'flex',
+//   // overflowX: 'auto',
+//   // overflowY: 'hidden',
+//   // whiteSpace: 'nowrap',
+//   // -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
+//   // scrollbar-width: none; /* Hide scrollbar for Firefox */
+// });
 
-const Categories = styled.div({
-  display: 'flex',
-});
+const Categories = styled.div`
+  display: flex;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+`;
 
 const CategoryCard = styled.div({
   width: '220px',
   height: '100px',
-  backgroundColor: 'purple',
+  backgroundColor: 'white',
   borderRadius: '12px',
   marginRight: margin.Small,
-});
-
-const Close = styled.div({
-  position: 'absolute',
-  top: '25px',
-  right: '25px',
-  height: '40px',
-  width: '40px',
-  border: `1px solid ${primaryGrey}`,
-  borderRadius: '20px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-});
-
-const CloseIcon = styled.div({
-  fontSize: '22px',
-  fontWeight: '600',
-  marginBottom: margin.Small,
-});
-
-
-
-const AddNewCategory = styled.div({
-  position: 'absolute',
-  right: '15px',
-  bottom: '15px',
-  width: '50px',
-  height: '50px',
-  borderRadius: '25px',
-  backgroundColor: primaryBlue,
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-});
-
-const PlusIcon = styled.div({
-  color: 'white',
-  fontSize: '28px',
-  marginBottom: margin.Small,
+  // padding: 1rem,
+  // margin: 0 0.5rem;
+  // background-color: lightgray;
+  // border-radius: 8px;
 });
 
 const Button = styled.div({
@@ -478,20 +478,19 @@ const Heading = styled.div({
 
 const Quantity = styled.span({
   borderRadius: '10px',
-  padding: '6px 10px',
-  backgroundColor: primaryText,
+  padding: '6px 0',
   color: primaryDark,
   fontSize: FontSize.large,
   fontWeight: 'bold',
   textAlign: 'center',
+  opacity: 0.5,
 });
 
 const Title = styled.h2({
   margin: '0',
   fontSize: '28px',
+  fontWeight: ''
 });
-
-const TakeMeBack =  styled.div({cursor: 'pointer'})
 
 const CirleButton = styled.div({
   position: 'absolute',
@@ -520,18 +519,6 @@ const Wrapper = styled.div({
   borderRadius: '25px',
   cursor: 'pointer',
 });
-
-const Icon = styled.div({
-  flexBasis: '6%',
-  marginLeft: margin.Small,
-  margin: 'auto 0'
-});
-
-const ArrowRightIcon = styled.div({
-  display: 'flex',
-  justifyContent: 'right',
-  margin: 'auto 0'
-})
 
 const Item = styled.li({
   color: primaryText,
