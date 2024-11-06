@@ -1,10 +1,11 @@
 import styled from 'styled-components';
-import { FontSize, margin, primaryBlue, primaryDark, primaryGrey, primaryText, primaryWhite } from '../../helpers/Variables';
+import { blueGrotto, FontSize, Margin, primaryBlue, primaryDark, primaryGrey, primaryText, primaryWhite } from '../../helpers/Variables';
 import { useEffect, useState } from 'react';
-import { Calendar, Award, Archive, Anchor, Airplay, ArrowLeft, Plus, Circle, Check, Flag, Folder, Moon, Crosshair, X, Disc } from 'react-feather';
+import { Calendar, Award, Archive, Anchor, ArrowUp, Airplay, ArrowLeft, Plus, Circle, Check, Flag, Folder, Moon, Crosshair, X, Disc, CheckCircle } from 'react-feather';
 import InputModal from '../InputModal';
 import ProgressBar from '../ProgressBar';
 import Carousel from '../Carousel';
+import ColorPicker from '../ColorPicker';
 
 interface Todo {
   text: string;
@@ -16,6 +17,7 @@ interface TodoCategory {
   todos: Todo[];
   quantity: number;
   icon: number
+  color: string;
 };
 
 interface NewCategoryTemplate {
@@ -25,15 +27,10 @@ interface NewCategoryTemplate {
 
 export default () => {
   const [categories, setCategories] = useState<TodoCategory[]>([
-    { id: 1, categoryName: 'Work', todos: [], quantity: 0,  icon: 1},
-    { id: 2, categoryName: 'Home', todos: [], quantity: 0, icon: 2 },
-    { id: 3, categoryName: 'list', todos: [], quantity: 0, icon: 2 },
-    { id: 4, categoryName: 'shopping', todos: [], quantity: 0, icon: 2 },
-    { id: 5, categoryName: 'funny', todos: [], quantity: 0, icon: 2 },
-    { id: 6, categoryName: 's', todos: [], quantity: 0, icon: 2 },
-    { id: 7, categoryName: 'a', todos: [], quantity: 0, icon: 2 },
-    { id: 8, categoryName: 'q', todos: [], quantity: 0, icon: 2 },
-    { id: 9, categoryName: 'd', todos: [], quantity: 0, icon: 2 },
+    { id: 1, categoryName: 'Work', todos: [{text: "sopa", completed: false}, {text: "städa", completed: true}], quantity: 0,  icon: 1, color: '#e6e060'},
+    { id: 2, categoryName: 'Home', todos: [], quantity: 0, icon: 2, color: '#3fb017' },
+    { id: 3, categoryName: 'list', todos: [], quantity: 0, icon: 2, color: '#774e9a' },
+    { id: 4, categoryName: 'shopping', todos: [], quantity: 0, icon: 2, color: '#a93101' },
   ]);
   const [activeCategoryInput, toggleActiveCategoryInput] = useState<Boolean>(false);
   const [newCategory, setNewCategory] = useState<NewCategoryTemplate[]>([]);
@@ -41,13 +38,13 @@ export default () => {
   const [newCategoryText, setNewCategoryText] = useState<string>('');
   const [newTodoText, setNewTodoText] = useState<string>('');
   const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<TodoCategory | null>();
+  const [colorPicker, toggleColorPicker] = useState<boolean>(false);
+  const [activeColor, setActiveColor] = useState<string>("#CBC3E3");
 
   // Used for <Modal />
   const [inputModal, toggleInputModal] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Used for <ProgressBar />
-  const [progress, setProgress] = useState(50);
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -97,7 +94,7 @@ export default () => {
     
     if(newCategoryText !== "") {
       const tempCategories = [...categories];
-      tempCategories.push({ id: categories.length + 1, categoryName: newCategoryText, todos: [], quantity: 0, icon: 2 });
+      tempCategories.push({ id: categories.length + 1, categoryName: newCategoryText, todos: [], quantity: 0, icon: 2, color: activeColor });
       setCategories(tempCategories);
       toggleInputModal(false);
       toggleActiveCategoryInput(false);
@@ -136,7 +133,6 @@ export default () => {
     const locateCategory = categories.find(category => category?.id === id);
     const numberOfCompletedTodos = locateCategory?.todos.filter(todo => todo.completed === true).length;
     const allIsCompleted = numberOfCompletedTodos === locateCategory?.todos.length;
-
     return allIsCompleted;
   }
 
@@ -146,16 +142,13 @@ export default () => {
     setCategories(tempArr);
   }
 
-  const [isVisible, setIsVisible] = useState<boolean>(false);
+  useEffect(() => {
+    setSelectedCategory(categories.filter(category => category.id === selectedCategoryId)[0]);
+  },[selectedCategoryId])
 
   useEffect(() => {
-    // Set a timeout to trigger the animation after a short delay
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 100); // Delay to trigger the animation
-
-    return () => clearTimeout(timer);
-  }, []);
+    toggleColorPicker(false);
+  },[activeColor])
 
   return (
     <Container>
@@ -172,155 +165,75 @@ export default () => {
           foundCategory?.categoryName }
         </MainTitle>
         <Progress>
-        Slide 4
           {!categoryIsNull && `${foundCategory?.quantity} / ${numberOfCompletedTodos}`}
         </Progress>
       </Heading>
       <CategoryTitle>
         Categories
       </CategoryTitle>
+
       {/* TOP CONTENT CAROUSEL */}
       <Carousel>
         {categories.map(category => (
-           <CategoryCard key={category.id}>
-           <Wrapper>
-             {/*!TODO */}
-             {/* {allTodosIsCompleted(category.id) ? <button onClick={() => handleRemove(category.id)}>X</button> : <Icon>{generateIcon(category.icon)}</Icon>} */}
-             <Quantity >
-               {category.quantity} tasks
-             </Quantity>
-             <Title 
-               onClick={() => setSelectedCategoryId(category.id)}
-               style={
-                 {
-                   textDecoration: allTodosIsCompleted(category.id) ? 'line-through' : 'none',
-                   opacity: allTodosIsCompleted(category.id) ? 0.5 : 1
-                 }
-               }
-               >
-             {category.categoryName}
-           </Title>
-           <ProgressBar progress={parseInt((category.todos.filter(todo => todo.completed === true).length /
-           category.quantity * 100).toFixed(0))} color="blue" height={25}/>
-           </Wrapper>
-           {/* {selectedCategoryId === category.id && (
-             <>
-               <Listing>
-                 {category.todos.map((todo, index) => (
-                   <Item key={index}>
-                     <Name style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
-                       {todo.text}
-                     </Name>
-                     <CTA onClick={() => toggleTodoCompletion(category.id, index)}>
-                       {!todo.completed ? <Circle /> : <Check />}
-                     </CTA>
-                   </Item>
-                 ))}
-               </Listing>
-               <CirleButton onClick={() => toggleActivateInput(!activateInput)}>
-                 <span>
-                   <Plus strokeWidth={2} color='white' size={36}/>
-                 </span>
-               </CirleButton>
-               {activateInput &&
-               <div>
-                 <input
-                   type="text"
-                   value={newTodoText}
-                   placeholder={`Add todo to ${category.categoryName}`}
-                   onChange={(e) => setNewTodoText(e.target.value)}
-                 />
-                 <button onClick={handleAddTodo}>Add Todo</button>
-               </div>}
-             </>
-           )} */}
+          <CategoryCard key={category.id}>
+          <Wrapper>
+            <Quantity>
+              {category.todos.length} tasks
+            </Quantity>
+            <Title 
+            onClick={() => setSelectedCategoryId(category.id)}
+            style={
+              {
+                textDecoration: allTodosIsCompleted(category.id) ? 'line-through' : 'none',
+                opacity: allTodosIsCompleted(category.id) ? 0.5 : 1
+              }
+            }
+            >
+            {category.categoryName}
+          </Title>
+          <ProgressBar progress={parseInt((category.todos.filter(todo => todo.completed === true).length /
+          category.quantity * 100).toFixed(0))} color={category.color} height={25}/>
+          </Wrapper>
          </CategoryCard>
         ))}
       </Carousel>
-      <Categories>
-      {categoryIsNull
-        ?
-        categories.map(category => (
-          <CategoryCard key={category.id}>
-            <Wrapper>
-              {/*!TODO */}
-              {/* {allTodosIsCompleted(category.id) ? <button onClick={() => handleRemove(category.id)}>X</button> : <Icon>{generateIcon(category.icon)}</Icon>} */}
-              <Quantity >
-                {category.quantity} tasks
-              </Quantity>
-              <Title 
-                onClick={() => setSelectedCategoryId(category.id)}
-                style={
-                  {
-                    textDecoration: allTodosIsCompleted(category.id) ? 'line-through' : 'none',
-                    opacity: allTodosIsCompleted(category.id) ? 0.5 : 1
-                  }
-                }
-                >
-              {category.categoryName}
-            </Title>
-            <ProgressBar progress={parseInt((category.todos.filter(todo => todo.completed === true).length /
-            category.quantity * 100).toFixed(0))} color="blue" height={25}/>
-            </Wrapper>
-            {selectedCategoryId === category.id && (
-              <>
-                <Listing>
-                  {category.todos.map((todo, index) => (
-                    <Item key={index}>
-                      <Name style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
-                        {todo.text}
-                      </Name>
-                      <CTA onClick={() => toggleTodoCompletion(category.id, index)}>
-                        {!todo.completed ? <Circle /> : <Check />}
-                      </CTA>
-                    </Item>
-                  ))}
-                </Listing>
-                <CirleButton onClick={() => toggleActivateInput(!activateInput)}>
-                  <span>
-                    <Plus strokeWidth={2} color='white' size={36}/>
-                  </span>
-                </CirleButton>
-                {activateInput &&
-                <div>
-                  <input
-                    type="text"
-                    value={newTodoText}
-                    placeholder={`Add todo to ${category.categoryName}`}
-                    onChange={(e) => setNewTodoText(e.target.value)}
-                  />
-                  <button onClick={handleAddTodo}>Add Todo</button>
-                </div>}
-              </>
-            )}
-          </CategoryCard>
-        )):
-        categories
-          .filter(category => category.id === selectedCategoryId)
-          .map(category => (
-            <Listing key={category.id}>
-              {categoryIsNull && <h2>{category.categoryName} ({category.quantity})</h2>}
-              {/* Show todos for the selected category */}
-              <div>
-                {category.todos.map((todo, index) => (
-                  <Item key={index}>
-                    <Name style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
-                      {todo.text}
-                    </Name>
-                    {/* Icon representation */}
-                    <CTA onClick={() => toggleTodoCompletion(category.id, index)}>
-                    {!todo.completed ? <Circle /> : <Check />}
-                  </CTA>
-                  </Item>
-                ))}
-              </div>
-            </Listing>
-          ))
-      }
-      </Categories>
 
-      <OpenModal onClick={openModal}><Plus /></OpenModal>
-      <InputModal isOpen={isModalOpen} onClose={closeModal} title="Sample Modal">
+      {/* IF YOU HAVE SELECTED A CATEOGRY */}
+      {foundCategory &&
+        <TodoListing>
+          {foundCategory.todos.map((todo, index) => (
+            <TodoCard key={index}>
+              <CompletionToggler onClick={() => toggleTodoCompletion(foundCategory.id, index)}>
+                {!todo.completed ? <Circle color={foundCategory.color} /> : <CheckCircle opacity={0.5}/>}
+              </CompletionToggler>
+              <Name style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
+                {todo.text}
+              </Name>
+            </TodoCard>
+          ))}
+        </TodoListing>
+      }
+
+      {!selectedCategory && 
+        <TodoListing>
+          <CategoryTitle>Today's tasks</CategoryTitle>
+          {categories.map(category => category.todos.map((todo, index) => 
+            <TodoCard key={index}>
+            <CompletionToggler onClick={() => toggleTodoCompletion(category.id, index)}>
+              {!todo.completed ? <Circle color={category.color} /> : <CheckCircle opacity={0.5}/>}
+            </CompletionToggler>
+            <Name style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}>
+              {todo.text}
+            </Name>
+          </TodoCard>
+          ))}
+        </TodoListing>
+      }
+
+      <OpenModal onClick={openModal}>
+        <Plus color='white'/>
+        </OpenModal>
+      <InputModal isOpen={isModalOpen} onClose={closeModal}>
       {categoryIsNull ? (
       <>
         <Input
@@ -331,25 +244,34 @@ export default () => {
         />
         <DateWrapper>
           <CalendarBtn><Calendar size={16}/>Today</CalendarBtn>
-          <RoundButton><Disc color={primaryBlue}/></RoundButton>
+          <ColorPickerContainer onClick={() => toggleColorPicker(prev => !prev)}><Disc color={activeColor}/></ColorPickerContainer>
+          {colorPicker && <ColorPicker setActiveColor={setActiveColor} />}
         </DateWrapper>
         <TriButtonWrapper>
           <Folder />
           <Flag style={{margin: '0 16px'}}/>
           <Moon />
         </TriButtonWrapper>
-        <Button onClick={addNewCategory}>Add Todo</Button>
+        <Button onClick={addNewCategory}><span>New Category</span></Button>
       </>)
       :(
-        <div>
-          <input
-            type="text"
-            value={newTodoText}
-            // placeholder={`Add todo to ${category.categoryName}`}
-            onChange={(e) => setNewTodoText(e.target.value)}
-          />
-          <button onClick={handleAddTodo}>Add Todo</button>
-        </div>
+        <>
+        <Input
+          type="text"
+          value={newTodoText}
+          placeholder={`Add new task`}
+          onChange={(e) => setNewTodoText(e.target.value)}
+        />
+        <DateWrapper>
+          <CalendarBtn><Calendar size={16}/>Today</CalendarBtn>
+        </DateWrapper>
+        <TriButtonWrapper>
+          <Folder />
+          <Flag style={{margin: '0 16px'}}/>
+          <Moon />
+        </TriButtonWrapper>
+        <Button onClick={handleAddTodo}>New Todo</Button>
+      </>
       )
     }
       </InputModal>
@@ -357,14 +279,14 @@ export default () => {
   );
 };
 
-const OpenModal = styled.button({
+const OpenModal = styled.div({
   position: 'absolute',
   right: '15px',
   bottom: '15px',
   width: '50px',
   height: '50px',
   borderRadius: '25px',
-  backgroundColor: primaryBlue,
+  backgroundColor: blueGrotto,
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -372,10 +294,11 @@ const OpenModal = styled.button({
 
 const Input = styled.input({
   display: 'flex',
-  padding: margin.Medium,
+  padding: Margin.Medium,
   cursor: 'pointer',
-  margin:  `${margin.Large} auto`,
+  margin:  `${Margin.Large} auto`,
   border: 'none',
+  fontSize: '18px',
 });
 
 const DateWrapper = styled.div({
@@ -395,10 +318,10 @@ const CalendarBtn = styled.div({
   width: '80px',
   height: '20px',
   borderRadius: '20px',
-  marginRight: margin.Small,
+  marginRight: Margin.Small,
 });
 
-const RoundButton = styled.div({
+const ColorPickerContainer = styled.div({
   height: '40px',
   width: '40px',
   border: `1px solid ${primaryGrey}`,
@@ -409,38 +332,35 @@ const RoundButton = styled.div({
 });
 
 const TriButtonWrapper = styled.div({
-  margin: `${margin.XLarge} auto`,
+  margin: `${Margin.XLarge} auto`,
 });
-
-// const Categories = styled.div({
-//   display: 'flex',
-//   // overflowX: 'auto',
-//   // overflowY: 'hidden',
-//   // whiteSpace: 'nowrap',
-//   // -ms-overflow-style: none; /* Hide scrollbar for IE and Edge */
-//   // scrollbar-width: none; /* Hide scrollbar for Firefox */
-// });
-
-const Categories = styled.div`
-  display: flex;
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  overflow-y: hidden;
-  white-space: nowrap;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-`;
 
 const CategoryCard = styled.div({
   width: '220px',
   height: '100px',
   backgroundColor: 'white',
   borderRadius: '12px',
-  marginRight: margin.Small,
-  // padding: 1rem,
-  // margin: 0 0.5rem;
-  // background-color: lightgray;
-  // border-radius: 8px;
+  marginRight: Margin.Small,
+});
+
+const TodoCard = styled.div({
+  width: '100%',
+  height: '50px',
+  backgroundColor: 'white',
+  borderRadius: '12px',
+  marginBottom: Margin.Small,
+  display: 'flex',
+  alignItems: 'center',
+});
+
+const CompletionToggler = styled.div({
+  cursor: 'pointer',
+  marginRight: Margin.Large,
+  marginLeft: Margin.Small,
+});
+
+const TodoListing = styled.div({
+  marginTop: Margin.Large,
 });
 
 const Button = styled.div({
@@ -448,12 +368,13 @@ const Button = styled.div({
   bottom: '25px',
   right: '25px',
   margin: '0 auto',
-  width: '120px',
-  height: '40px',
+  width: '150px',
+  height: '50px',
   color: 'white',
   backgroundColor: primaryBlue,
   textAlign: 'center',
   borderRadius: '25px',
+  alignContent: 'center',
 });
 
 const Container = styled.div({
@@ -473,7 +394,7 @@ const Heading = styled.div({
   justifyContent: 'space-between',
   color: primaryText,
   alignItems: 'center',
-  marginBottom: margin.Medium,
+  marginBottom: Margin.Medium,
 });
 
 const Quantity = styled.span({
@@ -488,44 +409,17 @@ const Quantity = styled.span({
 
 const Title = styled.h2({
   margin: '0',
+  marginBottom: Margin.Small,
   fontSize: '28px',
   fontWeight: ''
 });
 
-const CirleButton = styled.div({
-  position: 'absolute',
-  cursor: 'pointer',
-  backgroundColor: primaryDark,
-  borderRadius: '50%',
-  height: 56,
-  width: 56,
-  bottom: 24,
-  right: 24,
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-});
-
-const Listing = styled.div({
-  minHeight: '350px',
-  borderRadius: '25px',
-  padding: margin.MediumLarge,
-});
-
 const Wrapper = styled.div({
-  margin: `${margin.Small} 0`,
+  margin: `${Margin.Small} 0`,
   
-  padding: margin.Medium,
+  padding: Margin.Medium,
   borderRadius: '25px',
   cursor: 'pointer',
-});
-
-const Item = styled.li({
-  color: primaryText,
-  listStyle: 'none',
-  display: 'flex',
-  justifyContent: 'space-between',
-  padding: '6px 0',
 });
 
 const Name = styled.p({
@@ -534,9 +428,6 @@ const Name = styled.p({
   textTransform: 'capitalize'
 });
 
-const CTA = styled.div({
-  cursor: 'pointer',
-});
 
 const Progress = styled.div({
   fontWeight: 700,

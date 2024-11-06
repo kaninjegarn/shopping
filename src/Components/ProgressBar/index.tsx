@@ -1,4 +1,3 @@
-import React from 'react';
 import styled from 'styled-components';
 
 interface ProgressBarProps {
@@ -40,17 +39,7 @@ export default (props: ProgressBarProps) => {
           fontSize: height * 0.6,
         }}
       >
-        {/* {clampProgress}% */}
       </Inner>
-      {/* TODO FIX? */}
-      {/* <Anchor
-      id="test"
-        style={{
-          width: '5px',
-          height: '10px',
-          backgroundColor: 'red',
-        }}
-      ></Anchor> */}
     </Outer>
   );
 };
@@ -63,17 +52,6 @@ const Outer = styled.div<{$backgroundColor: string; $height: number;}>`
   height: 3;
 `;
 
-// const Inner = styled.div({
-//   height: '100%',
-//   width: `${clampProgress}%`,
-//   backgroundColor: color,
-//   transition: 'width 0.3s ease',
-//   borderRadius: 'inherit',
-//   textAlign: 'center',
-//   color: '#fff',
-//   fontSize: height * 0.6,
-// });
-
 const Inner = styled.div<{ $clampProgress?: number; $color: string; $height: number; }>`
   height: '100%';
   width: ${props => props.$clampProgress}%;
@@ -84,6 +62,3 @@ const Inner = styled.div<{ $clampProgress?: number; $color: string; $height: num
   color: '#fff';
   fontSize: ${props => props.$height} * 0.6;
 `;
-
-const Anchor = styled.div({
-});

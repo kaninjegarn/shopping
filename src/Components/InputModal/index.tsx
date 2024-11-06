@@ -27,7 +27,8 @@ export default (props: ModalProps) => {
   if (!isOpen) return null;
 
   return (
-    <Modal onClick={onClose}>
+    // <Modal onClick={onClose}>
+    <Modal>
       <div onClick={(e) => e.stopPropagation()}>
         <Close onClick={onClose}>
           <X />
@@ -52,7 +53,7 @@ const Modal = styled.div({
   justifyContent: 'center',
   background: 'white',
   height: '100vh',
-  width: '90%',
+  width: '100%',
   // z-index: 1000;
 });
 

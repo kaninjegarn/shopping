@@ -9,6 +9,7 @@ export const primaryGrey = "#ADBAEB";
 export const primaryDark = "#373B5E";
 export const primaryBlue = "#2643C4";
 export const primaryPurple = "#AO56C5";
+export const blueGrotto = "#0E86D4";
 
 
 
@@ -20,7 +21,8 @@ export const primaryText = "#020417";
 export const secondaryText = "#9D9AB4";
 
 // margins
-export enum margin {
+export enum Margin {
+    Tiny = "4px",
     Small = "8px",
     Medium = "12px",
     MediumLarge = "16px",
